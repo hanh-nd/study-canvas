@@ -20,6 +20,9 @@
             <el-menu-item index="5">
                 <template #title>Pen</template>
             </el-menu-item>
+            <el-menu-item index="6">
+                <template #title>Laser</template>
+            </el-menu-item>
         </el-menu>
         <el-color-picker v-model="color" @change="$emit('on-color-change', color)" />
     </div>
@@ -49,6 +52,9 @@ export default class Toolbar extends Vue {
                 break;
             case 5:
                 this.arrowType = ArrowType.LINE;
+                break;
+            case 6:
+                this.arrowType = ArrowType.LASER;
                 break;
             default:
                 this.arrowType = ArrowType.SELECT;

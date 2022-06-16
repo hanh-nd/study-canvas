@@ -13,7 +13,7 @@
                     v-for="rectangle in rectangles"
                     :key="rectangle.name"
                     :rectangle="rectangle"
-                    @transformend="handleTransform"
+                    @transformend="handleTransformRectangle"
                     @dragstart="moveToTop(ArrowType.RECTANGLE)"
                     @click="moveToTop(ArrowType.RECTANGLE)"
                 />
@@ -21,7 +21,7 @@
                     v-for="circle in circles"
                     :key="circle.name"
                     :circle="circle"
-                    @transformend="handleTransform"
+                    @transformend="handleTransformCircle"
                     @dragstart="moveToTop(ArrowType.CIRCLE)"
                     @click="moveToTop(ArrowType.CIRCLE)"
                 />
@@ -29,7 +29,6 @@
                     v-for="quad in quads"
                     :key="quad.name"
                     :quad="quad"
-                    @transformend="handleTransform"
                     @dragstart="moveToTop(ArrowType.QUAD)"
                     @click="moveToTop(ArrowType.QUAD)"
                 />
@@ -37,13 +36,16 @@
                     v-for="line in lines"
                     :key="line.name"
                     :line="line"
-                    @transformend="handleTransform"
                     @dragstart="moveToTop"
                     @click="moveToTop"
                 />
-
                 <v-transformer ref="transformer" />
-                <v-rect :config="selectionRectangle" />
+                <KonvaLaser
+                    v-for="laser in lasers"
+                    :key="laser.name"
+                    :laser="laser"
+                    :isHideCursor="arrowType === ArrowType.LASER"
+                />
             </v-layer>
         </v-stage>
     </div>
@@ -58,9 +60,10 @@ import { generateUuid } from '../common/helper';
 import KonvaRectangle from '@/konva-components/KonvaRectangle.vue';
 import KonvaQuad from '@/konva-components/KonvaQuad.vue';
 import KonvaLine from '@/konva-components/KonvaLine.vue';
+import KonvaLaser from '@/konva-components/KonvaLaser.vue';
 
 @Options({
-    components: { KonvaCircle, KonvaRectangle, KonvaQuad, KonvaLine },
+    components: { KonvaCircle, KonvaRectangle, KonvaQuad, KonvaLine, KonvaLaser },
 })
 export default class MyKonva extends Vue {
     @Prop({ default: ArrowType.SELECT }) arrowType!: ArrowType;
@@ -78,19 +81,26 @@ export default class MyKonva extends Vue {
     };
 
     mounted() {
+        this.setupCanvas();
+        window.addEventListener('keydown', this.onKeyDown);
+        window.addEventListener('mousemove', this.onMouseMove);
+        window.addEventListener('resize', this.setupCanvas);
+    }
+
+    setupCanvas() {
         const canvas = document.getElementById('canvas');
         if (canvas) {
             const { width, height } = canvas.getBoundingClientRect();
             this.stageSize.width = width;
             this.stageSize.height = height;
         }
-        window.addEventListener('keydown', this.onKeyDown);
     }
 
     // Props
     isDrawing = false;
     selectedShapeName = '';
     transformerNode = '';
+
     x1 = 0;
     x2 = 0;
     y1 = 0;
@@ -112,20 +122,28 @@ export default class MyKonva extends Vue {
             };
         },
     };
+    laser = {
+        points: [0, 0],
+        fill: 'red',
+        visible: false,
+        stroke: 'black',
+        strokeWidth: 2,
+    };
 
     // Shapes
     rectangles: Rectangle[] = [];
     circles: Circle[] = [];
     quads: Shape[] = [];
     lines: Line[] = [];
+    lasers: Line[] = [];
 
-    // Methods
+    // Event listener
     onKeyDown(e: any) {
         if (e.keyCode === 46) {
             if (this.selectedShapeName) {
-                const shape = this.selectedShapeName.split('-')[0];
+                const shape = this.selectedShapeName.split('-')[0] as ArrowType;
                 switch (shape) {
-                    case 'rectangle':
+                    case ArrowType.RECTANGLE:
                         {
                             const rect = this.rectangles.find(
                                 (r) => r.name === this.selectedShapeName,
@@ -135,7 +153,7 @@ export default class MyKonva extends Vue {
                             this.rectangles.splice(index, 1);
                         }
                         break;
-                    case 'circle':
+                    case ArrowType.CIRCLE:
                         {
                             const circle = this.circles.find(
                                 (r) => r.name === this.selectedShapeName,
@@ -145,7 +163,7 @@ export default class MyKonva extends Vue {
                             this.circles.splice(index, 1);
                         }
                         break;
-                    case 'quad':
+                    case ArrowType.QUAD:
                         {
                             const quad = this.quads.find(
                                 (r) => r.name === this.selectedShapeName,
@@ -155,7 +173,7 @@ export default class MyKonva extends Vue {
                             this.quads.splice(index, 1);
                         }
                         break;
-                    case 'line':
+                    case ArrowType.LINE:
                         {
                             const line = this.lines.find(
                                 (r) => r.name === this.selectedShapeName,
@@ -170,6 +188,16 @@ export default class MyKonva extends Vue {
                 this.updateTransformer();
                 return;
             }
+        }
+    }
+
+    onMouseMove(e: any) {
+        if (this.arrowType === ArrowType.LASER) {
+            this.laser.visible = true;
+            const position = (this.$refs.stage as any).getNode().getPointerPosition();
+            this.laser.points = [+position.x, +position.y];
+        } else {
+            this.laser.visible = false;
         }
     }
 
@@ -213,7 +241,7 @@ export default class MyKonva extends Vue {
 
             case ArrowType.RECTANGLE:
                 this.rectangles.push({
-                    name: generateUuid('rectangle'),
+                    name: generateUuid(ArrowType.RECTANGLE),
                     x: position.x,
                     y: position.y,
                     width: 50,
@@ -225,7 +253,7 @@ export default class MyKonva extends Vue {
 
             case ArrowType.CIRCLE:
                 this.circles.push({
-                    name: generateUuid('circle'),
+                    name: generateUuid(ArrowType.CIRCLE),
                     x: position.x,
                     y: position.y,
                     radius: 30,
@@ -236,7 +264,7 @@ export default class MyKonva extends Vue {
 
             case ArrowType.QUAD:
                 this.quads.push({
-                    name: generateUuid('quad'),
+                    name: generateUuid(ArrowType.QUAD),
                     x: position.x,
                     y: position.y,
                     width: 100,
@@ -248,10 +276,20 @@ export default class MyKonva extends Vue {
 
             case ArrowType.LINE:
                 this.lines.push({
-                    name: generateUuid('line'),
+                    name: generateUuid(ArrowType.LINE),
                     points: [+position.x, +position.y],
                     fill: 'red',
                     stroke: this.currentColor || 'black',
+                });
+                break;
+            case ArrowType.LASER:
+                this.lasers.push({
+                    name: generateUuid(ArrowType.LINE),
+                    points: [+position.x, +position.y],
+                    stroke: 'red',
+                    strokeWidth: 4,
+                    lineCap: 'round',
+                    lineJoin: 'round',
                 });
                 break;
         }
@@ -304,6 +342,21 @@ export default class MyKonva extends Vue {
                         ]);
                         currentLine.points = points;
                     }
+                    break;
+                case ArrowType.LASER:
+                    {
+                        const currentLaser = this.lasers[this.lasers.length - 1];
+                        const points = currentLaser?.points?.concat([
+                            position.x,
+                            position.y,
+                        ]);
+                        currentLaser.points = points;
+                        setTimeout(() => {
+                            currentLaser.points?.splice(0, 10);
+                            (this.$refs.stage as any).getNode().draw();
+                        }, 1000);
+                    }
+
                     break;
             }
         }
@@ -433,6 +486,12 @@ export default class MyKonva extends Vue {
                 }
                 break;
         }
+    }
+
+    unmounted() {
+        window.removeEventListener('keydown', this.onKeyDown);
+        window.removeEventListener('mousemove', this.onMouseMove);
+        window.removeEventListener('resize', this.setupCanvas);
     }
 }
 </script>

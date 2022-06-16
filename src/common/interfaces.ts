@@ -2,11 +2,17 @@ import { Vue } from 'vue-class-component';
 import Konva from 'konva';
 
 export enum ArrowType {
-    SELECT,
-    RECTANGLE,
-    CIRCLE,
-    QUAD,
-    LINE,
+    SELECT = 'select',
+    RECTANGLE = 'rectangle',
+    CIRCLE = 'circle',
+    QUAD = 'quad',
+    LINE = 'line',
+    LASER = 'laser',
+}
+
+export interface Pointer {
+    x: number;
+    y: number;
 }
 
 export interface Shape {
@@ -17,7 +23,9 @@ export interface Shape {
     height?: number;
     fill?: string;
     stroke?: string;
+    strokeWidth?: number;
     rotation?: number;
+    visible?: boolean;
 }
 
 export interface Rectangle extends Shape {
@@ -32,6 +40,8 @@ export interface Circle extends Shape {
 
 export interface Line extends Shape {
     points?: number[];
+    lineCap?: string;
+    lineJoin?: string;
 }
 
 export interface KonvaLayer extends Vue {
