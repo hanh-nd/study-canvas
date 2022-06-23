@@ -30,6 +30,7 @@ export default class KonvaQuad extends Vue {
                 context.fillStrokeShape(shape);
             },
             draggable: true,
+            strokeScaleEnabled: false,
         };
     }
 

@@ -18,10 +18,25 @@
                 <template #title>Quad</template>
             </el-menu-item>
             <el-menu-item index="5">
-                <template #title>Pen</template>
+                <template #title>Draggable but Nonremovable Pen</template>
             </el-menu-item>
             <el-menu-item index="6">
+                <template #title>Nondraggable but Removable Pen</template>
+            </el-menu-item>
+            <el-menu-item index="7">
                 <template #title>Laser</template>
+            </el-menu-item>
+            <el-menu-item index="8">
+                <template #title>Eraser</template>
+            </el-menu-item>
+            <el-menu-item index="9">
+                <template #title>Export to image</template>
+            </el-menu-item>
+            <el-menu-item index="10">
+                <template #title>Save</template>
+            </el-menu-item>
+            <el-menu-item index="11">
+                <template #title>Open</template>
             </el-menu-item>
         </el-menu>
         <el-color-picker v-model="color" @change="$emit('on-color-change', color)" />
@@ -34,7 +49,13 @@ import { ArrowType } from '../common/interfaces';
 
 @Options({
     components: {},
-    emits: ['on-arrow-type-change', 'on-color-change'],
+    emits: [
+        'on-arrow-type-change',
+        'on-color-change',
+        'on-export-image',
+        'on-save-file',
+        'on-open-file',
+    ],
 })
 export default class Toolbar extends Vue {
     arrowType: ArrowType = ArrowType.SELECT;
@@ -54,7 +75,22 @@ export default class Toolbar extends Vue {
                 this.arrowType = ArrowType.LINE;
                 break;
             case 6:
+                this.arrowType = ArrowType.REMOVABLE_LINE;
+                break;
+            case 7:
                 this.arrowType = ArrowType.LASER;
+                break;
+            case 8:
+                this.arrowType = ArrowType.ERASER;
+                break;
+            case 9:
+                this.$emit('on-export-image');
+                break;
+            case 10:
+                this.$emit('on-save-file');
+                break;
+            case 11:
+                this.$emit('on-open-file');
                 break;
             default:
                 this.arrowType = ArrowType.SELECT;

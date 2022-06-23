@@ -2,12 +2,14 @@ import { Vue } from 'vue-class-component';
 import Konva from 'konva';
 
 export enum ArrowType {
-    SELECT = 'select',
-    RECTANGLE = 'rectangle',
-    CIRCLE = 'circle',
-    QUAD = 'quad',
-    LINE = 'line',
-    LASER = 'laser',
+    SELECT = 'Select',
+    RECTANGLE = 'Rectangle',
+    CIRCLE = 'Circle',
+    QUAD = 'Quad',
+    LINE = 'Line',
+    REMOVABLE_LINE = 'RemovableLine',
+    LASER = 'Laser',
+    ERASER = 'Eraser',
 }
 
 export interface Pointer {
@@ -15,6 +17,11 @@ export interface Pointer {
     y: number;
 }
 
+export enum MouseButton {
+    LEFT = 0,
+    SCROLL = 1,
+    RIGHT = 2,
+}
 export interface Shape {
     name?: string;
     x?: number;
@@ -26,6 +33,8 @@ export interface Shape {
     strokeWidth?: number;
     rotation?: number;
     visible?: boolean;
+    draggable?: boolean;
+    globalCompositeOperation?: string;
 }
 
 export interface Rectangle extends Shape {
@@ -42,6 +51,7 @@ export interface Line extends Shape {
     points?: number[];
     lineCap?: string;
     lineJoin?: string;
+    strokeScaleEnabled?: boolean;
 }
 
 export interface KonvaLayer extends Vue {

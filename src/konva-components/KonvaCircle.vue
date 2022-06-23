@@ -12,6 +12,7 @@ export default class KonvaCircle extends Vue {
         return {
             ...this.circle,
             draggable: true,
+            strokeScaleEnabled: false,
         };
     }
 

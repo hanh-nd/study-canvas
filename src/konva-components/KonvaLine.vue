@@ -15,7 +15,7 @@ export default class KonvaLine extends Vue {
     get config() {
         return {
             ...this.line,
-            draggable: true,
+            strokeScaleEnabled: false,
         };
     }
 

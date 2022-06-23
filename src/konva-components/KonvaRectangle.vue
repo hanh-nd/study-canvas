@@ -16,6 +16,7 @@ export default class KonvaRectangle extends Vue {
         return {
             ...this.rectangle,
             draggable: true,
+            strokeScaleEnabled: false,
         };
     }
 
